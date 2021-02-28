@@ -1,0 +1,21 @@
+# as in k-opt
+kmax            15 # latest mona lisa
+kmax            3
+
+#kmax_kswap      5
+
+# required.
+tsp_file_path   ../data/xqf131.tsp
+tsp_file_path   ../data/pbn423.tsp
+tsp_file_path   ../data/lrb744710.tsp
+tsp_file_path   input/monalisa100K.tsp
+tsp_file_path   ../data/xrb14233.tsp
+# optional.
+#tour_file_path  saves/xqf131_564.tour
+#tour_file_path  ../data/lrb744710.tour
+#tour_file_path   input/monalisa100K_5757191.tour
+tour_file_path  /tmp/perturbed.tour
+tour_file_path  ../data/xrb14233.tour
+
+# if not specified, better tours are not saved.
+output_path /tmp/local-optimum.tour
