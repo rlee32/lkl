@@ -1,6 +1,6 @@
 # as in k-opt
 kmax            15 # latest mona lisa
-kmax            3
+kmax            5
 
 #kmax_kswap      5
 

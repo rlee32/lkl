@@ -28,6 +28,7 @@ public:
     template <typename SequenceContainer = std::vector<primitives::sequence_t>>
     KMove swap_sequence(SequenceContainer starts, SequenceContainer ends, SequenceContainer edges_to_remove);
 
+    const auto &sequence() const { return sequence_; }
     const auto &next() const { return next_; }
     const auto &order() const { return order_; }
 

@@ -9,6 +9,7 @@
 #include "kmove.hh"
 #include "kmargin.hh"
 #include "cycle_check.hh"
+#include "feasibility/multi_segment.hh"
 
 class HillClimber
 {
@@ -17,20 +18,24 @@ class HillClimber
 
     std::optional<KMove> find_best(const Tour &tour, size_t kmax);
 
-    void changed(const KMove &kmove);
-
     int nonfeasible_checks_{0};
 
 private:
-    size_t m_kmax {3};
+    size_t kmax_{3};
 
-    KMove m_kmove;
-    primitives::point_id_t m_swap_end {constants::invalid_point};
-    bool m_stop {false};
+    KMove kmove_; // keeps track of current move.
+    // the final point of the current move (known when move construction starts).
+    primitives::point_id_t swap_end_{constants::INVALID_POINT};
+    bool stop_{false}; // when an improving move is found, this is set to true.
 
+    // Keeps track of gain margin (e.g. search radius).
     KMargin m_kmargin;
+    // Tells us if a deletion will result in a disconnecting sequential move.
+    feasibility::MultiSegment multi_segment_;
 
-    void search(primitives::point_id_t i);
+
+    // Starts move from one point.
+    void start_search(primitives::point_id_t i);
     void delete_both_edges();
     void try_nearby_points();
 
@@ -44,19 +49,17 @@ private:
 
     std::vector<primitives::point_id_t> search_neighborhood(primitives::point_id_t p);
 
-    const Tour *m_tour{nullptr};
+    const Tour *tour_{nullptr};
     const PointSet &m_point_set;
 
     primitives::sequence_t size() const {
-        return m_tour->size();
+        return tour_->size();
     }
     primitives::point_id_t next(primitives::point_id_t i) const {
-        return m_tour->next(i);
+        return tour_->next(i);
     }
     primitives::point_id_t prev(primitives::point_id_t i) const {
-        return m_tour->prev(i);
+        return tour_->prev(i);
     }
-
-    std::vector<std::optional<Box>> search_extents_;
 };
 

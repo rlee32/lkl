@@ -10,8 +10,7 @@
 #include <optional>
 #include <string>
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char** argv) {
     if (argc == 1) {
         std::cout << "Arguments: config_file_path" << std::endl;
     }
