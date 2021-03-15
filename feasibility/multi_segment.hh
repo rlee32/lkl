@@ -4,6 +4,7 @@
 #include <primitives.hh>
 #include <vector>
 #include <cycle.hh>
+#include <unordered_map>
 
 #include "segment.hh"
 
@@ -23,7 +24,9 @@ public:
 
     // Splits this segment given a point and edge direction.
     // In order to maintain a single segment, the point can only split one way.
-    point_id_t split(const Cycle &cycle, point_id_t split_point);
+    std::optional<point_id_t> split(const Cycle &cycle, point_id_t split_point);
+
+    auto head() const { return head_; }
 
 private:
     // First segment contains start, which is fixed and does not change.
@@ -34,6 +37,15 @@ private:
     point_id_t fixed_tail_{constants::INVALID_POINT};
     // Dynamic point that changes with each split.
     point_id_t head_{constants::INVALID_POINT};
+
+
+    // Reverses segments in [start_index, end).
+    void reverse(size_t start_index);
+
+    // Gets the point that is toward head at the given segment index.
+    primitives::point_id_t get_end(size_t segment_index);
+
+    std::unordered_map<primitives::point_id_t, primitives::point_id_t> new_edges_;
 };
 
 } // namespace feasibility

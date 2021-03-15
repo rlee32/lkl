@@ -5,6 +5,7 @@ Tour::Tour(const point_quadtree::Domain* domain
 : domain_(domain)
 , adjacents_(initial_tour.size(), {constants::INVALID_POINT, constants::INVALID_POINT})
 , next_(initial_tour.size(), constants::INVALID_POINT)
+, prev_(initial_tour.size(), constants::INVALID_POINT)
 , sequence_(initial_tour.size(), constants::INVALID_POINT)
 , box_maker_(domain->x(), domain->y())
 , length_calculator_(domain->x(), domain->y()) {
@@ -99,6 +100,7 @@ primitives::length_t Tour::length(primitives::point_id_t i, primitives::point_id
 void Tour::update_next(const primitives::point_id_t start) {
     primitives::point_id_t current {start};
     next_[current] = adjacents_[current].front();
+    prev_[next_[current]] = current;
     primitives::point_id_t sequence {0};
     order_.clear();
     order_.reserve(next_.size());
@@ -107,6 +109,7 @@ void Tour::update_next(const primitives::point_id_t start) {
         sequence_[current] = sequence++;
         order_.push_back(current);
         current = next_[current];
+        prev_[current] = prev;
         next_[current] = get_other(current, prev);
     } while (current != start); // tour cycle condition.
     if (order_.size() != next_.size()) {

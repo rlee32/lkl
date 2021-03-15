@@ -31,12 +31,13 @@ private:
     // Keeps track of gain margin (e.g. search radius).
     KMargin m_kmargin;
     // Tells us if a deletion will result in a disconnecting sequential move.
-    feasibility::MultiSegment multi_segment_;
+    // For now, implemented as a stack for simplicity.
+    std::vector<feasibility::MultiSegment> multi_segments_;
 
 
     // Starts move from one point.
     void start_search(primitives::point_id_t i);
-    void delete_both_edges();
+    void delete_next_edge();
     void try_nearby_points();
 
     void reset_search();

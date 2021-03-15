@@ -30,6 +30,7 @@ public:
 
     const auto &sequence() const { return sequence_; }
     const auto &next() const { return next_; }
+    const auto &prev() const { return prev_; }
     const auto &order() const { return order_; }
 
     auto next(primitives::point_id_t i) const { return next_[i]; }
@@ -106,6 +107,7 @@ protected:
     using Adjacents = std::array<primitives::point_id_t, 2>;
     std::vector<Adjacents> adjacents_;
     std::vector<primitives::point_id_t> next_;
+    std::vector<primitives::point_id_t> prev_;
     std::vector<primitives::sequence_t> sequence_;
     std::vector<primitives::point_id_t> order_;
     BoxMaker box_maker_;

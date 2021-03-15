@@ -3,27 +3,59 @@
 #include <cassert>
 #include <utility>
 #include <algorithm>
+#include <iostream>
 
 namespace feasibility {
 
-Segment Segment::split(const Cycle &cycle, point_id_t split_point_1, point_id_t split_point_2) {
-    assert(cycle.normalized_sequence(split_point_1, split_point_2) == 1 or cycle.normalized_sequence(split_point_2, split_point_1) == 1);
-    assert(has_point(cycle, split_point_1) and has_point(cycle, split_point_2));
+namespace {
 
-    // Get sequence numbers. first_ has sequence number 0.
-    const auto second_seq = cycle.normalized_sequence(second_, first_);
-    assert(second_seq != 0); // degnerate segments are allowed, but not to split.
-    const auto split_seq_1 = cycle.normalized_sequence(split_point_1, first_);
-    const auto split_seq_2 = cycle.normalized_sequence(split_point_2, first_);
+primitives::sequence_t seq_diff(primitives::sequence_t a, primitives::sequence_t b) {
+    return (a > b) ? a - b : b - a;
+}
 
-    // Update second point on this segment, perform split, and return new segment.
-    auto original_second = second_;
-    if (split_seq_1 < split_seq_2) {
-        second_ = split_seq_1;
-        return Segment(split_seq_2, original_second);
+} // namespace
+
+Segment Segment::split(const Cycle &cycle, point_id_t split_point, point_id_t split_toward) {
+    assert(split_point != split_toward); // check that we are not deleting a new edge.
+    assert(has_point(cycle, split_point)); // check that split_point is in this segment.
+    assert(first_ == split_toward or second_ == split_toward);
+
+    // prev or next to split_point will be new head.
+    auto prev = cycle.prev(split_point);
+    auto next = cycle.next(split_point);
+    const auto prev_seq = cycle.normalized_sequence(prev, first_);
+    const auto next_seq = cycle.normalized_sequence(next, first_);
+
+    // check sequence numbers.
+    if (seq_diff(prev_seq, next_seq) != 2) {
+        // in this case, the split point is on the endpoint.
+        assert(prev_seq == 1 or next_seq == 1);
+        std::cout << prev_seq << ", " << next_seq << std::endl;
+        assert(prev_seq == cycle.size() - 1 or next_seq == cycle.size() - 1);
+        assert(split_point == first_);
+        assert(split_toward == first_);
     } else {
-        second_ = split_seq_2;
-        return Segment(split_seq_1, original_second);
+        // This should only happen if split_point is on first_.
+        assert(prev_seq < next_seq);
+    }
+
+    std::cout << first_ << " is first, second is " << second_ << std::endl;
+    std::cout << split_toward << " split toward" << std::endl;
+    // split_toward must be in the new segment (which gets appended to segment list).
+    auto original_first = first_;
+    auto original_second = second_;
+    if (prev_seq < next_seq) {
+        if (split_toward == first_) {
+            first_ = split_point;
+            return Segment(original_first, prev);
+        } else {
+            second_ = split_point;
+            return Segment(next, original_second);
+        }
+    } else {
+        // This should only happen if split_point is on first_.
+        second_ = split_point;
+        return Segment(next, original_second);
     }
 }
 
@@ -32,16 +64,27 @@ void Segment::reverse() {
 }
 
 bool Segment::has_point(const Cycle &cycle, point_id_t point) const {
-    return cycle.normalized_sequence(point, first_) <= cycle.normalized_sequence(second_, first_);
+    auto seq = cycle.normalized_sequence(point, first_);
+    auto mag = seqmag(cycle);
+    std::cout << "seq, point, seqmag: " << seq << ", " << point << ", " << mag << std::endl;
+    return seq <= mag;
 }
 
 bool Segment::has_point(point_id_t point) const {
     return point == first_ or point == second_;
 }
 
+bool Segment::is_degenerate() const {
+    return first_ == second_;
+}
+
 primitives::point_id_t Segment::other(point_id_t point) const {
     assert(has_point(point));
     return first_ == point ? second_ : first_;
+}
+
+primitives::sequence_t Segment::seqmag(const Cycle &cycle) const {
+    return cycle.normalized_sequence(second_, first_);
 }
 
 } // namespace feasibility

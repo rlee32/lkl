@@ -21,9 +21,10 @@ class Segment {
 public:
     Segment(point_id_t first, point_id_t second) : first_(first), second_(second) {}
 
-    // Splits this segment given a 2 split points, which should be an existing edge in the tour (e.g. sequence 1 apart).
+    // Splits this segment given a split point and an endpoint to split toward.
     // The split points can be in any order.
-    Segment split(const Cycle &cycle, point_id_t split_point_1, point_id_t split_point_2);
+    // Returns the segment closer to the 'split_toward' point.
+    Segment split(const Cycle &cycle, point_id_t split_point, point_id_t split_toward);
 
     // Returns true if this segment contains the point.
     bool has_point(const Cycle &cycle, point_id_t point) const;
@@ -31,10 +32,19 @@ public:
     // Returns true if one of the endpoints match the input point.
     bool has_point(point_id_t point) const;
 
+    // Returns true if first_ and second_ are equal.
+    bool is_degenerate() const;
+
     // Returns the point not equal to input point.
     primitives::point_id_t other(point_id_t point) const;
 
+    // The difference in sequence number between first and second.
+    primitives::sequence_t seqmag(const Cycle &cycle) const;
+
     void reverse();
+
+    const auto &first() const { return first_; }
+    const auto &second() const { return second_; }
 
 private:
     point_id_t first_{constants::INVALID_POINT};
