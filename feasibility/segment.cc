@@ -28,19 +28,15 @@ Segment Segment::split(const Cycle &cycle, point_id_t split_point, point_id_t sp
 
     // check sequence numbers.
     if (seq_diff(prev_seq, next_seq) != 2) {
-        // in this case, the split point is on the endpoint.
+        // This should only happen if split_point is on first_.
         assert(prev_seq == 1 or next_seq == 1);
-        std::cout << prev_seq << ", " << next_seq << std::endl;
         assert(prev_seq == cycle.size() - 1 or next_seq == cycle.size() - 1);
         assert(split_point == first_);
-        assert(split_toward == first_);
+        assert(split_toward != first_);
     } else {
-        // This should only happen if split_point is on first_.
         assert(prev_seq < next_seq);
     }
 
-    std::cout << first_ << " is first, second is " << second_ << std::endl;
-    std::cout << split_toward << " split toward" << std::endl;
     // split_toward must be in the new segment (which gets appended to segment list).
     auto original_first = first_;
     auto original_second = second_;
@@ -66,7 +62,6 @@ void Segment::reverse() {
 bool Segment::has_point(const Cycle &cycle, point_id_t point) const {
     auto seq = cycle.normalized_sequence(point, first_);
     auto mag = seqmag(cycle);
-    std::cout << "seq, point, seqmag: " << seq << ", " << point << ", " << mag << std::endl;
     return seq <= mag;
 }
 
@@ -86,6 +81,14 @@ primitives::point_id_t Segment::other(point_id_t point) const {
 primitives::sequence_t Segment::seqmag(const Cycle &cycle) const {
     return cycle.normalized_sequence(second_, first_);
 }
+
+void Segment::print(const Cycle &cycle) const {
+    std::cout << "first, second, size: "
+        << first_ << ", "
+        << second_ << ", "
+        << seqmag(cycle) << std::endl;
+}
+
 
 } // namespace feasibility
 

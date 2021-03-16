@@ -5,6 +5,7 @@
 #include <vector>
 #include <cycle.hh>
 #include <unordered_map>
+#include <optional>
 
 #include "segment.hh"
 
@@ -24,6 +25,8 @@ public:
 
     // Splits this segment given a point and edge direction.
     // In order to maintain a single segment, the point can only split one way.
+    // Sometimes a split cannot be performed due to current progress, e.g. deleting an edge that has just been made,
+    // in which case nullopt is returned.
     std::optional<point_id_t> split(const Cycle &cycle, point_id_t split_point);
 
     auto head() const { return head_; }

@@ -13,6 +13,7 @@ std::optional<KMove> HillClimber::find_best(const Tour &tour, size_t kmax) {
     kmax_ = kmax;
     reset_search();
     for (primitives::point_id_t i{0}; i < size(); ++i) {
+        std::cout << i << std::endl;
         start_search(i);
         if (stop_) {
             return kmove_;
@@ -46,6 +47,7 @@ void HillClimber::start_search(primitives::point_id_t i) {
 }
 
 void HillClimber::try_nearby_points() {
+    std::cout << multi_segments_.size() << std::endl;
     const auto start = kmove_.starts.back();
     assert(start == multi_segments_.back().head());
     for (auto p : search_neighborhood(start)) {
@@ -84,30 +86,26 @@ void HillClimber::delete_next_edge() {
     // get other end point of deleted edge. only 1 of the 2 adjacent edges can be deleted.
     multi_segments_.push_back(multi_segments_.back());
     Cycle cycle(tour_->sequence(), tour_->prev(), tour_->next());
-    auto start = multi_segments_.back().split(cycle, i).value();
-    std::cout << i << ", " << start << "; " << prev(i) << ", " << next(i) << std::endl;
-    std::cout << prev(prev(i)) << std::endl;
-    std::cout << next(next(i)) << std::endl;
-    std::cout << prev(prev(prev(i))) << std::endl;
-    std::cout << next(next(next(i))) << std::endl;
-
-    assert(prev(i) == start or next(i) == start);
-    if (kmove_.startable(start)) {
-        const auto &edge = prev(i) == start ? start : i;
-        if (kmove_.removable(edge)) {
-            kmove_.starts.push_back(start);
-            kmove_.removes.push_back(edge);
-            m_kmargin.increase(length(edge));
-            try_nearby_points();
-            if (stop_) {
-                return;
+    auto maybe_start = multi_segments_.back().split(cycle, i);
+    if (maybe_start) {
+        auto start = maybe_start.value();
+        assert(prev(i) == start or next(i) == start);
+        if (kmove_.startable(start)) {
+            const auto &edge = prev(i) == start ? start : i;
+            if (kmove_.removable(edge)) {
+                kmove_.starts.push_back(start);
+                kmove_.removes.push_back(edge);
+                m_kmargin.increase(length(edge));
+                try_nearby_points();
+                if (stop_) {
+                    return;
+                }
+                kmove_.starts.pop_back();
+                kmove_.removes.pop_back();
+                m_kmargin.pop_increase();
             }
-            kmove_.starts.pop_back();
-            kmove_.removes.pop_back();
-            m_kmargin.pop_increase();
         }
     }
-
     assert(not stop_);
 
     multi_segments_.pop_back();

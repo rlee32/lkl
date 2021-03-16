@@ -46,6 +46,8 @@ public:
     const auto &first() const { return first_; }
     const auto &second() const { return second_; }
 
+    void print(const Cycle &cycle) const;
+
 private:
     point_id_t first_{constants::INVALID_POINT};
     point_id_t second_{constants::INVALID_POINT};
